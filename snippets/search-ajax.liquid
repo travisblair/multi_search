@@ -5,8 +5,9 @@
 
   $(document).on('click', '.search-btn', function(){
     $('.target').html('');
-    var searchArray = $('.input-group-field[type="search"]').val().replace(/ /g, '').replace(/,\s*$/, '').split(',');
-    search_ajax(searchArray);
+    var searchArray = $('.input-group-field[type="search"]').val().replace(/ /g, '').replace(/,\s*$/, '').split(','),
+        searchTitles = searchArray.join().split(',');
+    $.when(search_ajax(searchArray)).then(result_titles(searchTitles));
   });
   $('.input-group-field[type="search"]').on('keyup', function(event){
     key_presses(event);
@@ -33,7 +34,7 @@
           resultArray.push(data);
           var searchResults = data.results;
           search_ajax(searchArray);
-          generate_results(searchResults, searchTitles);
+          generate_results(searchResults);
         },
         error: function(error){
           console.error(error);
@@ -43,30 +44,31 @@
   }
 
   function result_titles(searchTitles){
-    console.log(searchTitles);
-    $.each($('.target ul'), function(index, item){
-      console.log(index)
+    $.each(searchTitles, function(indx, title){
+      $.each($('.target ul'), function(index, item){
+        if(index == indx){
+          $(item).prepend('<li><h4>'+title.toUpperCase()+'</h4></li>');
+        }
+      });
     });
   }
 
-  function generate_results(searchResults, searchTitles){
+  function generate_results(searchResults){
     var noResults = true;
     var resultItems = $('<ul></ul>');
     if(searchResults.length > 0){
       var resultElemets = $.map(searchResults, function(items, index) {
         noResults = false;
-        var resultList = $('<li></li>');
-        $('<li><a href="'+items.url+'"><img src="'+items.image+'"/><div>'+items.title+'</div><div>'+items.price+'</div></a></li>').appendTo(resultList);
-        return resultList;
+        $('<li><a href="'+items.url+'"><img src="'+items.image+'"/><div>'+items.title+'</div><div>'+items.price+'</div></a></li>').appendTo(resultItems);
+        return resultItems;
       });
     }
     if(noResults){
-      $('.target').append($('<h4 class="no-result">Nothing to see here!</h4>'));
+      $('.target').append($('<ul><li><h4 class="no-result">Sorry, we couldn\'t find anything.</h4></li></ul>'));
     }
     else{
       $('.target').prepend(resultElemets);
     }
-    result_titles(searchTitles);
   }
 
   function key_presses(event){
