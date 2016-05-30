@@ -1,6 +1,7 @@
 {% layout none %}
 {% paginate search.results by 100 %}
 {
+  "title": "{{ search.terms }}",
   "results":[
   {% for item in search.results %}
     {

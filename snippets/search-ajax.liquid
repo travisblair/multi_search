@@ -1,13 +1,13 @@
 <script>
+// TODO push searches into an array and then loop over the array and abort when new search is preformed.
+// TODO concatinate data that is returned into a new giant object.
 
-  var resultArray = [],
-      searchTitles;
+  // var searches = null;
 
-  $(document).on('click', function(){
+  $('.search-btn').on('click', function(){
     $('.target').html('');
-    var searchArray = $('.input-group-field[type="search"]').val().replace(/ /g, '').replace(/,\s*$/, '').split(','),
-        searchTitles = searchArray.join().split(',');
-    $.when(search_ajax(searchArray)).then(result_titles(searchTitles));
+    var searchArray = $('.input-group-field[type="search"]').val().replace(/ /g, '').replace(/,\s*$/, '').split(',');
+    search_ajax(searchArray);
   });
   $('.input-group-field[type="search"]').on('keyup', function(event){
     key_presses(event);
@@ -19,43 +19,37 @@
 
       var searchTerm = searchArray.shift();
 
-      $.ajax({
+      // if(searches){
+      //   searches.abort();
+      //   console.log('aborted');
+      // }
+      searches = $.ajax({
         type: 'GET',
         url: '/search',
         dataType: 'json',
-        async: false,
-        beforeSend: function(){ $('.searching').remove(); $('.input-group-field[type="search"]').before('<span class="searching">searching...</span>'); },
+        beforeSend: function(){ $('.searching').remove(); $('.input-group-field[type="search"]').before('<span class="searching" style="position: absolute; top:-25px;">searching...</span>'); },
         complete: function(){ $('.searching').remove(); },
         data: {
           view: 'search-json',
           q: searchTerm+'*'
         },
-        success: function(data){
-          resultArray.push(data);
-          var searchResults = data.results;
+        success: function(){
           search_ajax(searchArray);
-          generate_results(searchResults);
         },
         error: function(error){
-          console.error(error);
+          console.error('an error has occured: ' + error);
         }
+      }).then(function(data){
+        var searchResults = data.results,
+        searchTitles = data.title.replace('*', '').trim();
+        generate_results(searchResults, searchTitles);
       });
     }
   }
 
-  function result_titles(searchTitles){
-    $.each(searchTitles, function(indx, title){
-      $.each($('.target ul'), function(index, item){
-        if(index == indx){
-          $(item).prepend('<li><h4>'+title.toUpperCase()+'</h4></li>');
-        }
-      });
-    });
-  }
-
-  function generate_results(searchResults){
+  function generate_results(searchResults, searchTitles){
     var noResults = true;
-    var resultItems = $('<ul></ul>');
+    var resultItems = $('<ul><li><h4>'+searchTitles+'</h4></li></ul>');
     if(searchResults.length > 0){
       var resultElemets = $.map(searchResults, function(items, index) {
         noResults = false;
@@ -67,7 +61,7 @@
       $('.target').append($('<ul><li><h4 class="no-result">Sorry, we couldn\'t find anything.</h4></li></ul>'));
     }
     else{
-      $('.target').prepend(resultElemets);
+      $('.target').append(resultElemets);
     }
   }
 
