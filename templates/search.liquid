@@ -1,0 +1,15 @@
+{% paginate search.results by 100 %}
+
+<div class="input-group search-bar">
+  <input type="search" name="q" value="" class="input-group-field" placeholder="Search multiple products at once (ex. camera, fish, test)">
+  <span class="input-group-btn">
+    <button type="button" class="btn icon-fallback-text search-btn">
+      <span class="icon icon-search" aria-hidden="true"></span>
+      <span class="fallback-text">{{ 'general.search.submit' | t }}</span>
+    </button>
+  </span>
+</div>
+<div class="target"></div>
+
+{% include 'search-ajax' %}
+{% endpaginate %}

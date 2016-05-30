@@ -1,0 +1,80 @@
+<script>
+
+  var resultArray = [],
+      searchTitles;
+
+  $(document).on('click', '.search-btn', function(){
+    $('.target').html('');
+    var searchArray = $('.input-group-field[type="search"]').val().replace(/ /g, '').replace(/,\s*$/, '').split(',');
+    search_ajax(searchArray);
+  });      
+  $('.input-group-field[type="search"]').on('keyup', function(event){
+    key_presses(event);    
+  });  
+
+  function search_ajax(searchArray){
+
+    if(searchArray != ''){
+      debugger;      
+      var searchTerm = searchArray.shift();
+
+      $.ajax({
+        type: 'GET',
+        url: '/search',
+        dataType: 'json',
+        async: false,
+        beforeSend: function(){ $('.input-group-field[type="search"]').before('<span class="searching">searching...</span>'); },
+        complete: function(){ $('.searching').remove(); },
+        data: {
+          view: 'search-json',
+          q: searchTerm+'*'
+        },
+        success: function(data){
+          resultArray.push(data);         
+          var searchResults = data.results;          
+          search_ajax(searchArray);
+          generate_results(searchResults, searchTitles);
+        },
+        error: function(error){
+          console.error(error);
+        }
+      });
+    }
+  }
+  
+  function result_titles(searchTitles){
+    console.log(searchTitles);
+    $.each($('.target ul'), function(index, item){
+      console.log(index)
+    });    
+  }
+  
+  function generate_results(searchResults, searchTitles){
+    var noResults = true;
+    var resultItems = $('<ul></ul>');
+    if(searchResults.length > 0){            
+      $.each(searchResults, function(index, items){                
+        noResults = false;
+        $('<li><a href="'+items.url+'"><img src="'+items.image+'"/><div>'+items.title+'</div><div>$'+parseInt(items.price)/100+'</div></a></li>').appendTo(resultItems);    
+      });
+    }  
+    if(noResults){
+      $('.target').append($('<h4 class="no-result">Nothing to see here!</h4>'));            
+    }
+    else{
+      $('.target').prepend(resultItems);
+    }
+    result_titles(searchTitles);
+  }   
+   
+  function key_presses(event){
+    if(event.which == 27){
+      $('.input-group-field[type="search"]').blur();
+    }
+    else if(event.which == 13){
+      $('.target').html('');
+      $('.search-btn').trigger('click');
+    }
+  }
+
+</script>
