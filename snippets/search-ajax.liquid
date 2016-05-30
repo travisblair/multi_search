@@ -53,16 +53,18 @@
     var noResults = true;
     var resultItems = $('<ul></ul>');
     if(searchResults.length > 0){
-      $.each(searchResults, function(index, items){
+      var resultElemets = $.map(searchResults, function(items, index) {
         noResults = false;
-        $('<li><a href="'+items.url+'"><img src="'+items.image+'"/><div>'+items.title+'</div><div>'+items.price+'</div></a></li>').appendTo(resultItems);    
+        var resultList = $('<li></li>');
+        $('<li><a href="'+items.url+'"><img src="'+items.image+'"/><div>'+items.title+'</div><div>'+items.price+'</div></a></li>').appendTo(resultList);
+        return resultList;
       });
     }
     if(noResults){
       $('.target').append($('<h4 class="no-result">Nothing to see here!</h4>'));
     }
     else{
-      $('.target').prepend(resultItems);
+      $('.target').prepend(resultElemets);
     }
     result_titles(searchTitles);
   }
