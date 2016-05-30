@@ -24,7 +24,7 @@
         url: '/search',
         dataType: 'json',
         async: false,
-        beforeSend: function(){ $('.input-group-field[type="search"]').before('<span class="searching">searching...</span>'); },
+        beforeSend: function(){ $('.searching').remove(); $('.input-group-field[type="search"]').before('<span class="searching">searching...</span>'); },
         complete: function(){ $('.searching').remove(); },
         data: {
           view: 'search-json',
