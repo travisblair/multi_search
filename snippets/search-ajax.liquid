@@ -3,7 +3,7 @@
   var resultArray = [],
       searchTitles;
 
-  $(document).on('click', '.search-btn', function(){
+  $(document).on('click', function(){
     $('.target').html('');
     var searchArray = $('.input-group-field[type="search"]').val().replace(/ /g, '').replace(/,\s*$/, '').split(','),
         searchTitles = searchArray.join().split(',');
